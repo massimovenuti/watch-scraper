@@ -10,4 +10,9 @@ from itemadapter import ItemAdapter
 
 class ScraperPipeline:
     def process_item(self, item, spider):
+        # Modify image url with desired resolution
+        
+
+        # image can be accessed in item["image"]
+        # metadata can be accessed in item["metadata"]
         return item

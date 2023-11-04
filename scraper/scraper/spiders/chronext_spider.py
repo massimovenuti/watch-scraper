@@ -1,4 +1,5 @@
 import scrapy
+from .. import items
 
 
 class ChronextSpider(scrapy.Spider):
@@ -13,24 +14,31 @@ class ChronextSpider(scrapy.Spider):
         yield from response.follow_all(pagination_links, self.parse)
 
     def parse_watch(self, response):
-        item = {}
-
-        # Get images urls, modified with desired resolution
-        item["images_urls"] = [
+        # Parse images urls
+        # Adapt urls to get desired resolution
+        image_urls = [
             img.attrib["src"].replace("w=570", "w=1000") for img in response.css("div.product-stage__image-wrapper img")
         ]
 
-        # Get specifications
+        metadata = {}
+        # Parse specifications
         for specification_wrapper in response.css("div.specification__wrapper"):
-            specification_title = specification_wrapper.css("div.specification__title *::text").get(default="").strip()
-            specification_value = specification_wrapper.css("div.specification__value *::text").get(default="").strip()
+            specification_title = (
+                specification_wrapper.css("div.specification__title *::text").get(default="").strip().lower()
+            )
+            specification_value = (
+                specification_wrapper.css("div.specification__value *::text").get(default="").strip().lower()
+            )
 
             if specification_title != "":
-                item[specification_title] = specification_value
+                metadata[specification_title] = specification_value
             else:
-                if item.get("Fonctions", None) is None:
-                    item["Fonctions"] = [specification_value]
+                if metadata.get("fonctions", None) is None:
+                    metadata["fonctions"] = [specification_value]
                 else:
-                    item["Fonctions"].append(specification_value)
+                    metadata["fonctions"].append(specification_value)
 
-        yield item
+        yield items.WatchItem(
+            image_urls=image_urls,
+            metadata=metadata
+        )
