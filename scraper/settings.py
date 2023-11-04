@@ -66,7 +66,12 @@ ITEM_PIPELINES = {
     "scrapy.pipelines.images.ImagesPipeline": 1,
     "scraper.pipelines.ScraperPipeline": 300,
 }
+
+# Configure images handling
 IMAGES_STORE = "images/"
+IMAGES_THUMBS = {
+    "small": (100, 100),
+}
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
