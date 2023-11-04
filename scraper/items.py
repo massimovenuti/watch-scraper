@@ -4,9 +4,8 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-from dataclasses import dataclass
 
-@dataclass
 class WatchItem(scrapy.Item):
-    image_urls : list[str]
-    metadata : dict
+    image_urls = scrapy.Field()
+    images = scrapy.Field()
+    metadata = scrapy.Field()

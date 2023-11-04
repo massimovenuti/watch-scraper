@@ -1,1 +1,3 @@
 Scrapy
+pymongo
+Pillow
