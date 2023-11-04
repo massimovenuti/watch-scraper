@@ -33,9 +33,12 @@ class ScraperPipeline:
         self.client.close()
     
     def process_item(self, item, spider):
-        # images can be accessed in item["images"]
-        # metadata can be accessed in item["metadata"]
+        item = {
+            "image_paths": [img["url"] for img in item["images"]],
+            "image_urls": item["image_urls"],
+            **item["metadata"]
+        }
 
-        # self.db[self.collection_name].insert_one(ItemAdapter(item).asdict())
+        self.db[self.collection_name].insert_one(ItemAdapter(item).asdict())
 
         return item
