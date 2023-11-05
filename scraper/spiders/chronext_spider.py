@@ -2,7 +2,6 @@ from typing import Iterable
 import scrapy
 from .. import items
 import re
-import logging
 
 
 class ChronextSpider(scrapy.Spider):
@@ -25,6 +24,12 @@ class ChronextSpider(scrapy.Spider):
     specs_to_ignore = ["expédition", "emballage", "documents"]  # Unnecessary specs that don't need to be saved
 
     def start_requests(self) -> Iterable[scrapy.Request]:
+        """
+        Generate initial requests to begin the scraping process.
+
+        Returns:
+            Iterable[scrapy.Request]: An iterable of Scrapy Request objects to start the scraping process.
+        """
         for i in range(self.n_pages + 1):
             yield scrapy.Request(self.url.format(i * self.watches_per_page))
 
