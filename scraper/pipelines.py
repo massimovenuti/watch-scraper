@@ -109,11 +109,8 @@ class ScraperPipeline:
             **item["metadata"],
         }
 
-        # TODO : first check if path not already in the db
-        # if already exists, do nothing
-        # else insert new item
-
-        # Insert the item into the MongoDB collection
-        self.db[self.collection_name].insert_one(ItemAdapter(item).asdict())
+        # Insert the item into the MongoDB collection if it doesn't already exist
+        if not self.db[self.collection_name].find_one({"image_paths": {"$in": item["image_paths"]}}):
+            self.db[self.collection_name].insert_one(ItemAdapter(item).asdict())
 
         return item
