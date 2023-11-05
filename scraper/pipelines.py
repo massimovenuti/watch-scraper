@@ -70,7 +70,7 @@ class ScraperPipeline:
 
     def process_item(self, item: scrapy.Item, spider: scrapy.Spider):
         """
-        Process and store the scraped item in the MongoDB database.
+        Process and store the scraped item in the MongoDB database if not already existing.
 
         Args:
             item: The item to be processed and stored.
