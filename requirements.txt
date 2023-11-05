@@ -1,3 +1,5 @@
 Scrapy
 pymongo
 Pillow
+jupyter
+pandas
