@@ -1,50 +1,61 @@
+from typing import Iterable
 import scrapy
 from .. import items
 import re
+import logging
 
 
 class ChronextSpider(scrapy.Spider):
     """
-    Scrapy spider for crawling and scraping watch product information from the Chronext website.
+    Scrapy spider for crawling and scraping watches information from the Chronext website.
     """
 
     name = "chronext"
-    start_urls = ["https://www.chronext.fr/acheter"]
+
+    # Trim to keep only digits in a text. Usefull to parse price.
+    trim = re.compile(r"[^\d.,]+")  
+
+    # Attributes to preload every pages of the products pagination
+    watches_per_page = 24
+    n_pages = 264
+    url = "https://www.chronext.fr/acheter?s%5Bef5bfee0-c7d4-470e-82e2-39d397cb3750%5D%5Boffset%5D={}"
+
+    # Settings to control parsing
+    desired_img_width = 1000
     specs_to_ignore = ["expédition", "emballage", "documents"]  # Unnecessary specs that don't need to be saved
-    number_trim = re.compile(r"[^\d.,]+")  # Trim to keep only numbers in a text. Usefull to parse price.
+
+    def start_requests(self) -> Iterable[scrapy.Request]:
+        for i in range(self.n_pages + 1):
+            yield scrapy.Request(self.url.format(i * self.watches_per_page))
 
     def parse(self, response: scrapy.http.Response):
         """
-        Parse the main page and follow links to watch product pages and pagination.
+        Parse the current products page and follow links to watches specification pages.
 
         Args:
-            response: The response object representing the main page.
+            response: The response object representing the current products page.
 
         Yields:
-            scrapy.Request: Requests to follow watch product pages and pagination.
+            scrapy.Request: Requests to follow watches specification pages.
         """
-        # Parse every watches product page from the current page
-        watch_page_links = response.css("div.product-list a")
+        watch_page_links = response.css("div.product-list a:first-of-type")
         yield from response.follow_all(watch_page_links, self.parse_watch_page)
-
-        # Parse next pages from the pagination
-        pagination_links = response.css("li.pagination__item--next a")
-        yield from response.follow_all(pagination_links, self.parse)
 
     def parse_watch_page(self, response: scrapy.http.Response):
         """
-        Parse a watch product page, extracting image URLs and watch specifications.
+        Parse a watch specification page, extracting image URLs and watch specifications.
 
         Args:
-            response: The response object representing a watch product page.
+            response: The response object representing a watch specification page.
 
         Yields:
-            items.WatchItem: Watch product information with image URLs and metadata.
+            items.WatchItem: Watch information with image URLs and metadata.
         """
 
-        # Parse images urls and adapt urls to get desired resolution
+        # Parse images urls and adapt them to get desired resolution
         image_urls = [
-            img.attrib["src"].replace("w=570", "w=1000") for img in response.css("div.product-stage__image-wrapper img")
+            img.attrib["src"].replace("w=570", f"w={self.desired_img_width}")
+            for img in response.css("div.product-stage__image-wrapper img")
         ]
 
         metadata = {}
@@ -60,7 +71,7 @@ class ChronextSpider(scrapy.Spider):
             )
 
             if specification_title in self.specs_to_ignore:
-                # Ignore unnecessary specs
+                # Ignore unwanted specs
                 continue
             elif specification_title == "":
                 # Watch functions case (e.g. luminous hands, chronograph)
@@ -72,9 +83,8 @@ class ChronextSpider(scrapy.Spider):
             else:
                 metadata[specification_title] = specification_value
 
-        # Parse price
+        # Parse price by keeping only digits
         price_str = response.css("div.price::text").get()
-        # Keep only numbers
-        metadata["price"] = float(self.number_trim.sub("", price_str))
+        metadata["price"] = float(self.trim.sub("", price_str))
 
         yield items.WatchItem(image_urls=image_urls, metadata=metadata)

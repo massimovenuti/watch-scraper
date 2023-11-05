@@ -104,9 +104,14 @@ class ScraperPipeline:
         # Reformat the item data to include image paths and metadata
         item = {
             "image_urls": item["image_urls"],
-            "image_paths": [img["url"] for img in item["images"]],
+            "image_paths": [img["path"] for img in item["images"]],
+            "thumb_paths": [img["path"].replace("full", "thumbs/small") for img in item["images"]],
             **item["metadata"],
         }
+
+        # TODO : first check if path not already in the db
+        # if already exists, do nothing
+        # else insert new item
 
         # Insert the item into the MongoDB collection
         self.db[self.collection_name].insert_one(ItemAdapter(item).asdict())

@@ -31,7 +31,7 @@ DOWNLOAD_DELAY = 0.5
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-COOKIES_ENABLED = False
+# COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 # TELNETCONSOLE_ENABLED = False
@@ -104,3 +104,6 @@ FEED_EXPORT_ENCODING = "utf-8"
 MONGO_URI = "localhost"
 MONGO_DATABASE = "watch_scraping"
 MONGO_PORT = 27017
+
+# Reduce logs
+LOG_LEVEL = 'INFO'
