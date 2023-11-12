@@ -9,7 +9,7 @@ class WatchesDataset:
         self.db = self.client[mongo_db]
         self.collection = self.db[mongo_collection]
         self.image_dir = image_dir
-        self.ds = Dataset.from_dict(self.load(), split="train").cast_column("image", Image())
+        self.ds = Dataset.from_dict(self.load()).cast_column("image", Image())
         self.client.close()
 
     def load(self):
