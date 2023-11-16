@@ -5,3 +5,9 @@ jupyter
 pandas
 matplotlib
 black
+diffusers
+transformers
+accelerate
+datasets
+torchvision
+tensorboard
